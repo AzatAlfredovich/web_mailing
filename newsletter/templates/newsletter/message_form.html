@@ -1,0 +1,23 @@
+{% extends "newsletter/base.html" %}
+{% block content %}
+<div class="container">
+    <div class="row text-start">
+        <div class="col-6 mx-auto">
+            <form class="row" method="post" enctype="multipart/form-data">
+                <div class="card mb-4 box-shadow">
+                    <div class="card-body">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                    </div>
+                        <button type="submit" class="btn btn-lg btn-block btn-outline-success mb-3">
+                            {% if object %}
+                            Сохранить
+                            {% else %}
+                            Создать
+                            {% endif %}
+                        </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock%}

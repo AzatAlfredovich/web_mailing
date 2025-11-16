@@ -1,0 +1,29 @@
+{% extends "newsletter/base.html" %}
+{% load my_tags %}
+
+{% block create_button %}
+<a class="btn btn-primary" href="{% url 'newsletter:mailing_create' %}" role="button">Создать рассылку</a>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row text-center">
+        {% for mailing in object_list%}
+        <div class="col-6">
+            <div class="card mb-4 box-shadow">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">{{ mailing.start_time|date:"d.m.Y H:i"  }} - {{ mailing.end_time|date:"d.m.Y H:i"  }}</h4>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title pricing-card-title mb-3"> Статус: {{ mailing.get_status_display }}</h6>
+                    <div class="buttons-container d-flex flex-column w-100">
+                        <a class="btn btn-md btn-outline-success full-width-btn mb-3" href="{% url 'newsletter:mailing_detail' mailing.pk %}">Посмотреть</a>
+                        <a class="btn btn-md btn-outline-primary full-width-btn mb-3" href="{% url 'newsletter:mailing_update' mailing.pk %}">Редактировать</a>
+                        <a class="btn btn-md btn-outline-danger full-width-btn mb-3" href="{% url 'newsletter:mailing_delete' mailing.pk %}">Удалить</a>
+                     </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock%}

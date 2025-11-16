@@ -1,0 +1,18 @@
+{% extends "newsletter/base.html" %}
+{% block content %}
+<div class="container">
+    <div class="row text-center">
+        <div class="col-6 mx-auto">
+            <form class="row" method="post" enctype="multipart/form-data">
+                <div class="card mb-4 box-shadow">
+                    <p class="lead">Действительно хотите удалить сообщение на тему: {{ object.subject }} ?</p>
+                    <div class="card-body">
+                        {% csrf_token %}
+                    </div>
+                    <button type="submit" class="btn btn-lg btn-block btn-outline-danger mb-3">Удалить</button>
+                    <a class="btn btn-lg btn-block btn-outline-success mb-3" href="{% url 'newsletter:messages' %}" role="button">Отменить</a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock%}
