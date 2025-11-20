@@ -32,29 +32,9 @@ class HomeView(TemplateView):
         context_data["active_mailing_count"] = Mailing.objects.filter(
             status="launched"
         ).count()
-
-        # Исправлено: исключаем None для корректного подсчёта
-        unique_clients_count = (
-            Mailing.objects.exclude(recipients=None)
-            .values_list("recipients", flat=True)
-            .distinct()
-            .count()
-        )
+        unique_clients_count = Mailing.objects.values("recipients").distinct().count()
         context_data["unique_clients_count"] = unique_clients_count
-
-        user = self.request.user
-        user_mailings = Mailing.objects.filter(owner=user)
-        context_data["total_successful_attempts"] = user_mailings.aggregate(
-            Sum("successful_attempts")
-        ).get("successful_attempts__sum", 0)
-        context_data["total_unsuccessful_attempts"] = user_mailings.aggregate(
-            Sum("unsuccessful_attempts")
-        ).get("unsuccessful_attempts__sum", 0)
-        context_data["total_sent_messages"] = user_mailings.aggregate(
-            Sum("sent_messages")
-        ).get("sent_messages__sum", 0)
         return context_data
-
 
 # Дженерики класса Получатель
 class RecipientListView(LoginRequiredMixin, ListView):
