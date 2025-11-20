@@ -1,0 +1,32 @@
+{% extends "newsletter/base.html" %}
+
+{% block create_button %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row text-center">
+        {% for users in object_list%}
+        <div class="col-6">
+            <div class="card mb-4 box-shadow">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">{{ users.username }}</h4>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title pricing-card-title mb-3">{{ users.email}}</h6>
+                    <div class="buttons-container d-flex flex-column w-100">
+                        {% if perms.users.can_block_user %}
+                        <form action="{% url 'users:block_user' users.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                {% if user.is_active %}Блокировать{% else %}Разблокировать{% endif %}
+                            </button>
+                        </form>
+                        {% endif %}
+                     </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock%}

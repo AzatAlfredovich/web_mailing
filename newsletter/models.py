@@ -1,6 +1,7 @@
 from django.db import models
 
-class Recipient(models.Model): #Получатель
+
+class Recipient(models.Model):  # Получатель
     email = models.EmailField(
         unique=True,
         verbose_name="Почта",
@@ -26,7 +27,8 @@ class Recipient(models.Model): #Получатель
     def __str__(self):
         return self.name
 
-class Message(models.Model): #Сообщение
+
+class Message(models.Model):  # Сообщение
     subject = models.CharField(
         max_length=50,
         verbose_name="Тема",
@@ -45,12 +47,13 @@ class Message(models.Model): #Сообщение
     def __str__(self):
         return self.subject
 
-class Mailing(models.Model): #Рассылка
+
+class Mailing(models.Model):  # Рассылка
     # Список возможных статутов рассылки
     STATUS_CHOICES = [
-        ('created', 'Создана'),
-        ('launched', 'Запущена'),
-        ('completed', 'Завершена')
+        ("created", "Создана"),
+        ("launched", "Запущена"),
+        ("completed", "Завершена"),
     ]
 
     start_time = models.DateTimeField(
@@ -64,50 +67,50 @@ class Mailing(models.Model): #Рассылка
         null=True,
     )
     status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES,
-        default='created',
-        verbose_name="Статус"
+        max_length=10, choices=STATUS_CHOICES, default="created", verbose_name="Статус"
     )
     message = models.ForeignKey(
-        Message,
-        on_delete=models.CASCADE,
-        verbose_name="Сообщение"
+        Message, on_delete=models.CASCADE, verbose_name="Сообщение"
     )
     recipients = models.ManyToManyField(
-        Recipient,
-        related_name='mailings',
-        verbose_name="Получатели"
+        Recipient, related_name="mailings", verbose_name="Получатели"
     )
-    successful_attempts = models.IntegerField(default=0)
-    unsuccessful_attempts = models.IntegerField(default=0)
-    sent_messages = models.IntegerField(default=0)
+    successful_attempts = models.IntegerField(default=0, verbose_name="Успешные попытки")
+    unsuccessful_attempts = models.IntegerField(default=0, verbose_name="Неуспешные попытки")
+    sent_messages = models.IntegerField(default=0, verbose_name="Сообщений отправлено")
     is_active = models.BooleanField(default=True, verbose_name="Рассылка активна")
 
     class Meta:
-        verbose_name = 'Рассылка'
-        verbose_name_plural = 'Рассылки'
+        verbose_name = "Рассылка"
+        verbose_name_plural = "Рассылки"
+        ordering = ["status"]
+        permissions = [
+            ("can_disable_mailing", "Can disable mailing"),
+        ]
 
     def __str__(self):
-        return f"{self.start_time.strftime('%d-%m-%Y %H:%M')} ({self.get_status_display()})"
+        return f"Рассылка {self.start_time} - {self.status}"
 
 
-class Mailing_Attempt(models.Model):# Попытка рассылки
+class Mailing_Attempt(models.Model):  # Попытка рассылки
     # Список возможных статутов попытки
-    ATTEMPT_STATUSES = [
-        ('successful', 'Успешно'),
-        ('unsuccessful', 'Не успешно')
-    ]
+    ATTEMPT_STATUSES = [("successful", "Успешно"), ("unsuccessful", "Не успешно")]
 
     attempt_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата попытки")
-    status = models.CharField(max_length=15, choices=ATTEMPT_STATUSES, verbose_name="Статус")
-    server_response = models.TextField(null=True, blank=True, verbose_name="Ответ сервера")
-    mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE, verbose_name="Рассылка")
+    status = models.CharField(
+        max_length=15, choices=ATTEMPT_STATUSES, verbose_name="Статус"
+    )
+    server_response = models.TextField(
+        null=True, blank=True, verbose_name="Ответ сервера"
+    )
+    mailing = models.ForeignKey(
+        Mailing, on_delete=models.CASCADE, verbose_name="Рассылка"
+    )
 
     class Meta:
-        verbose_name = 'Попытка рассылки'
-        verbose_name_plural = 'Попытки рассылки'
+        verbose_name = "Попытка рассылки"
+        verbose_name_plural = "Попытки рассылки"
+        ordering = ["status"]
 
     def __str__(self):
         return f"Попытка №{self.id}: {self.attempt_date}"
-
-

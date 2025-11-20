@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from newsletter.models import Recipient, Message, Mailing, Mailing_Attempt
+from newsletter.models import Mailing, Mailing_Attempt, Message, Recipient
 
 
 @admin.register(Recipient)
@@ -24,9 +24,8 @@ class MessageAdmin(admin.ModelAdmin):
         "subject",
         "body",
     )
-    search_fields = (
-        "subject",
-    )
+    search_fields = ("subject",)
+
 
 @admin.register(Mailing)
 class MailingAdmin(admin.ModelAdmin):
@@ -40,6 +39,7 @@ class MailingAdmin(admin.ModelAdmin):
         "end_time",
         "status",
     )
+
 
 @admin.register(Mailing_Attempt)
 class Mailing_AttemptAdmin(admin.ModelAdmin):

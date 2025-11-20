@@ -1,13 +1,16 @@
 from datetime import timezone
-from django.core.management.base import BaseCommand
-from newsletter.models import Mailing, Mailing_Attempt
+
+from django.conf.global_settings import EMAIL_HOST_USER
 from django.core.mail import send_mail
+from django.core.management.base import BaseCommand
 
+from newsletter.models import Mailing, Mailing_Attempt
 
-#Закончить после настройки пользователя!!!
+# Закончить после настройки пользователя!!!
+
 
 class Command(BaseCommand):
-    help = 'Отправляет выбранную рассылку вручную.'
+    help = "Отправляет выбранную рассылку вручную."
 
     def handle(self, *args, **kwargs):
         mailings = Mailing.objects.filter(status__in=["created", "started"])
