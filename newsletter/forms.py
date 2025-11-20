@@ -6,7 +6,7 @@ from newsletter.models import Mailing, Message, Recipient
 class MailingForm(ModelForm):
     class Meta:
         model = Mailing
-        fields = "__all__"
+        exclude = ("owner",)
 
     def __init__(self, *args, **kwargs):
         super(MailingForm, self).__init__(*args, **kwargs)
@@ -14,11 +14,14 @@ class MailingForm(ModelForm):
             field.help_text = ""
 
         self.fields["start_time"].widget.attrs.update(
-            {"class": "form-control", "placeholder": "Дата первой отправки"}
+            {"class": "form-control", "placeholder": "Начало отправки YYYY-MM-DD HH:MM"}
         )
 
         self.fields["end_time"].widget.attrs.update(
-            {"class": "form-control", "placeholder": "Окончание отправки"}
+            {
+                "class": "form-control",
+                "placeholder": "Окончание отправки YYYY-MM-DD HH:MM",
+            }
         )
 
         self.fields["status"].widget.attrs.update(
@@ -44,9 +47,7 @@ class MailingForm(ModelForm):
             {"class": "form-control", "placeholder": "Сообщений отправлено"}
         )
 
-        self.fields["is_active"].widget.attrs.update(
-            {"class": "form-check-input"}
-        )
+        self.fields["is_active"].widget.attrs.update({"class": "form-check-input"})
 
 
 class RecipientForm(ModelForm):

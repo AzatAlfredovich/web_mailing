@@ -37,9 +37,11 @@ class RegisterView(CreateView):
         )
         return super().form_valid(form)
 
+
 class CustomLoginView(LoginView):
-    template_name = 'users/login.html'
+    template_name = "users/login.html"
     authentication_form = CustomLoginForm
+
 
 class UsersListView(LoginRequiredMixin, ListView):
     model = CustomUser
@@ -57,28 +59,24 @@ class UsersListView(LoginRequiredMixin, ListView):
         context_data = super().get_context_data(**kwargs)
         context_data["count_mailing"] = Mailing.objects.count()
         context_data["active_mailing_count"] = Mailing.objects.filter(
-            status="started"
+            status="launched"
         ).count()
-        unique_clients_count = Mailing.objects.values("recipients").distinct().count()
+        unique_clients_count = (
+            Mailing.objects.values_list("recipients", flat=True).distinct().count()
+        )
         context_data["unique_clients_count"] = unique_clients_count
 
         user = self.request.user
         user_mailings = Mailing.objects.filter(owner=user)
-        context_data["total_successful_attempts"] = (
-                user_mailings.aggregate(Sum("successful_attempts"))[
-                    "successful_attempts__sum"
-                ]
-                or 0
-        )
-        context_data["total_unsuccessful_attempts"] = (
-                user_mailings.aggregate(Sum("unsuccessful_attempts"))[
-                    "unsuccessful_attempts__sum"
-                ]
-                or 0
-        )
-        context_data["total_sent_messages"] = (
-                user_mailings.aggregate(Sum("sent_messages"))["sent_messages__sum"] or 0
-        )
+        context_data["total_successful_attempts"] = user_mailings.aggregate(
+            Sum("successful_attempts")
+        ).get("successful_attempts__sum", 0)
+        context_data["total_unsuccessful_attempts"] = user_mailings.aggregate(
+            Sum("unsuccessful_attempts")
+        ).get("unsuccessful_attempts__sum", 0)
+        context_data["total_sent_messages"] = user_mailings.aggregate(
+            Sum("sent_messages")
+        ).get("sent_messages__sum", 0)
         return context_data
 
 

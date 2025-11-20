@@ -1,12 +1,10 @@
-from datetime import timezone
+from django.utils import timezone
 
 from django.conf.global_settings import EMAIL_HOST_USER
 from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
 
 from newsletter.models import Mailing, Mailing_Attempt
-
-# Закончить после настройки пользователя!!!
 
 
 class Command(BaseCommand):
@@ -25,7 +23,7 @@ class Command(BaseCommand):
                         fail_silently=False,
                     )
                     Mailing_Attempt.objects.create(
-                        date_attempt=timezone.now(),
+                        attempt_date=timezone.now(),
                         status="successful",
                         server_response="Email отправлен",
                         mailing=mailing,

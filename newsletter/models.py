@@ -1,5 +1,7 @@
 from django.db import models
 
+from users.models import CustomUser
+
 
 class Recipient(models.Model):  # Получатель
     email = models.EmailField(
@@ -75,10 +77,17 @@ class Mailing(models.Model):  # Рассылка
     recipients = models.ManyToManyField(
         Recipient, related_name="mailings", verbose_name="Получатели"
     )
-    successful_attempts = models.IntegerField(default=0, verbose_name="Успешные попытки")
-    unsuccessful_attempts = models.IntegerField(default=0, verbose_name="Неуспешные попытки")
+    successful_attempts = models.IntegerField(
+        default=0, verbose_name="Успешные попытки"
+    )
+    unsuccessful_attempts = models.IntegerField(
+        default=0, verbose_name="Неуспешные попытки"
+    )
     sent_messages = models.IntegerField(default=0, verbose_name="Сообщений отправлено")
     is_active = models.BooleanField(default=True, verbose_name="Рассылка активна")
+    owner = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, blank=True, null=True
+    )
 
     class Meta:
         verbose_name = "Рассылка"

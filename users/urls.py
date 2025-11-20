@@ -10,7 +10,8 @@ from users.views import (
     EmailConfirmationView,
     PasswordRecoveryView,
     RegisterView,
-    UsersListView, CustomLoginView,
+    UsersListView,
+    CustomLoginView,
 )
 
 app_name = UsersConfig.name

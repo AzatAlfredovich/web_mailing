@@ -84,17 +84,22 @@ class PasswordRecoveryForm(forms.Form):
             raise forms.ValidationError("Такого email нет в системе")
         return email
 
+
 class CustomLoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Настраиваем лейблы полей
-        self.fields['username'].label = 'Почта'
-        self.fields['password'].label = 'Пароль'
+        self.fields["username"].label = "Почта"
+        self.fields["password"].label = "Пароль"
 
         # Оформляем поля формы с помощью Bootstrap-классов
-        self.fields['username'].widget.attrs.update({
-            'class': 'form-control',
-        })
-        self.fields['password'].widget.attrs.update({
-            'class': 'form-control',
-        })
+        self.fields["username"].widget.attrs.update(
+            {
+                "class": "form-control",
+            }
+        )
+        self.fields["password"].widget.attrs.update(
+            {
+                "class": "form-control",
+            }
+        )

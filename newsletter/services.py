@@ -37,7 +37,7 @@ def run_mailing(request, pk):
                 server_response=str(e),
                 mailing=mailing,
             )
-    if mailing.end_sending and mailing.end_sending <= timezone.now():
+    if mailing.end_time and mailing.end_time <= timezone.now():
         # Если время рассылки закончилось, обновляем статус на "завершено"
         mailing.status = "completed"
     mailing.save()

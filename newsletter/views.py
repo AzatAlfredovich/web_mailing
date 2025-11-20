@@ -14,7 +14,9 @@ from django.views.generic import (
 
 from newsletter.forms import (
     MailingForm,
-    MailingModeratorForm, MessageForm, RecipientForm,
+    MailingModeratorForm,
+    MessageForm,
+    RecipientForm,
 )
 from newsletter.models import Mailing, Message, Recipient
 from newsletter.services import get_mailing_from_cache
@@ -35,7 +37,6 @@ class RecipientListView(LoginRequiredMixin, ListView):
                 "У вас нет прав для просмотра списка клиентов!"
             )
         return super().dispatch(request, *args, **kwargs)
-
 
 
 class RecipientDetailView(DetailView):
@@ -109,7 +110,7 @@ class MailingDetailView(DetailView):
     model = Mailing
 
 
-class MailingCreateView(CreateView):
+class MailingCreateView(LoginRequiredMixin, CreateView):
     model = Mailing
     form_class = MailingForm
     success_url = reverse_lazy("newsletter:mailings")
