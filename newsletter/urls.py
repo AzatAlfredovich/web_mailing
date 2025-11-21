@@ -6,6 +6,7 @@ from django.views.decorators.cache import cache_page
 from newsletter.apps import NewsletterConfig
 from newsletter.views import (
     HomeView,
+    MailingAttemptListView,
     MailingCreateView,
     MailingDeleteView,
     MailingDetailView,
@@ -69,6 +70,9 @@ urlpatterns = [
     ),
     path(
         "mailing/<int:pk>/delete/", MailingDeleteView.as_view(), name="mailing_delete"
+    ),
+    path(
+        "stats/", cache_page(60)(MailingAttemptListView.as_view()), name="attempt_list"
     ),
 ]
 

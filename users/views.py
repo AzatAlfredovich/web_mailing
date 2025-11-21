@@ -12,7 +12,7 @@ from django.views.generic import ListView, TemplateView
 from django.views.generic.edit import CreateView, FormView
 
 from newsletter.models import Mailing
-from users.forms import CustomUserCreationForm, PasswordRecoveryForm, CustomLoginForm
+from users.forms import CustomLoginForm, CustomUserCreationForm, PasswordRecoveryForm
 from users.models import CustomUser
 
 

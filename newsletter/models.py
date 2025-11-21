@@ -20,6 +20,9 @@ class Recipient(models.Model):  # Получатель
         verbose_name="Комментарий",
         help_text="Введите комментарий",
     )
+    owner = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, blank=True, null=True
+    )
 
     class Meta:
         verbose_name = "Получатель"

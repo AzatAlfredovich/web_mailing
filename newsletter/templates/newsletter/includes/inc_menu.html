@@ -22,6 +22,11 @@
                 {% if user.is_superuser or perms.users.can_block_user %}
                 <a class="btn btn-outline-success flex-fill" href="{% url 'users:users_list' %}" role="button">Пользователи</a>
                 {% endif %}
+
+                {% if user.is_superuser or not perms.users.can_manage_users %}
+                    <a class="btn btn-outline-primary flex-fill text-truncate" href="{% url 'newsletter:attempt_list' %}" role="button">Статистика</a>
+                {% endif %}
+
                 <form method="post" action="{% url 'users:logout' %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-outline-danger flex-fill">Выйти</button>

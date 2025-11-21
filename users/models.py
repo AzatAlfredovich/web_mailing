@@ -9,6 +9,7 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     country = models.CharField(max_length=30, blank=True, null=True)
     token = models.CharField(unique=True, null=True, blank=True)
+    is_manager = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -21,4 +22,5 @@ class CustomUser(AbstractUser):
         verbose_name_plural = "Пользователи"
         permissions = [
             ("can_block_user", "Сan block user"),
+            ("can_manage_users", "Can_manage_users"),
         ]

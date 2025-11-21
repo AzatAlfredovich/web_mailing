@@ -1,8 +1,7 @@
-from django.utils import timezone
-
 from django.conf.global_settings import EMAIL_HOST_USER
 from django.core.mail import send_mail
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 
 from newsletter.models import Mailing, Mailing_Attempt
 

@@ -53,7 +53,7 @@ class MailingForm(ModelForm):
 class RecipientForm(ModelForm):
     class Meta:
         model = Recipient
-        fields = "__all__"
+        exclude = ("owner",)
 
     def __init__(self, *args, **kwargs):
         super(RecipientForm, self).__init__(*args, **kwargs)
