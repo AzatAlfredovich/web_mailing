@@ -2,21 +2,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import (
-    CreateView,
-    DeleteView,
-    DetailView,
-    ListView,
-    TemplateView,
-    UpdateView,
-)
+from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
+                                  TemplateView, UpdateView)
 
-from newsletter.forms import (
-    MailingForm,
-    MailingModeratorForm,
-    MessageForm,
-    RecipientForm,
-)
+from newsletter.forms import (MailingForm, MailingModeratorForm, MessageForm,
+                              RecipientForm)
 from newsletter.models import Mailing, Mailing_Attempt, Message, Recipient
 from newsletter.services import get_mailing_from_cache
 
@@ -162,27 +152,27 @@ class RecipientDeleteView(RoleBasedMixin, LoginRequiredMixin, DeleteView):
 
 
 # Дженерики класса Сообщение
-class MessageListView(ListView):
+class MessageListView(LoginRequiredMixin, ListView):
     model = Message
 
 
-class MessageDetailView(DetailView):
+class MessageDetailView(LoginRequiredMixin, DetailView):
     model = Message
 
 
-class MessageCreateView(CreateView):
-    model = Message
-    form_class = MessageForm
-    success_url = reverse_lazy("newsletter:messages")
-
-
-class MessageUpdateView(UpdateView):
+class MessageCreateView(LoginRequiredMixin, CreateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy("newsletter:messages")
 
 
-class MessageDeleteView(DeleteView):
+class MessageUpdateView(LoginRequiredMixin, UpdateView):
+    model = Message
+    form_class = MessageForm
+    success_url = reverse_lazy("newsletter:messages")
+
+
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
     model = Message
     success_url = reverse_lazy("newsletter:messages")
 
@@ -275,6 +265,18 @@ class MailingUpdateView(RoleBasedMixin, LoginRequiredMixin, UpdateView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        mailing = form.save(commit=False)
+
+        # Логика статусов
+        if mailing.is_active:
+            # Если активна — сохраняем выбранный статус (из допустимых)
+            # Форма уже проверит choices благодаря __init__
+            pass
+        else:
+            # Если неактивна — принудительно ставим "completed"
+            mailing.status = "completed"
+
+        mailing.save()
         return super().form_valid(form)
 
 

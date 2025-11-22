@@ -47,7 +47,8 @@ def run_mailing(request, pk):
 @login_required
 def block_mailing(request, pk):
     mailing = Mailing.objects.get(pk=pk)
-    mailing.is_active = {mailing.is_active: False, not mailing.is_active: True}[True]
+    mailing.is_active = not mailing.is_active
+    mailing.status = "completed"
     mailing.save()
     return redirect(reverse("newsletter:mailings"))
 

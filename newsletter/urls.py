@@ -4,25 +4,15 @@ from django.urls import path
 from django.views.decorators.cache import cache_page
 
 from newsletter.apps import NewsletterConfig
-from newsletter.views import (
-    HomeView,
-    MailingAttemptListView,
-    MailingCreateView,
-    MailingDeleteView,
-    MailingDetailView,
-    MailingListView,
-    MailingUpdateView,
-    MessageCreateView,
-    MessageDeleteView,
-    MessageDetailView,
-    MessageListView,
-    MessageUpdateView,
-    RecipientCreateView,
-    RecipientDeleteView,
-    RecipientDetailView,
-    RecipientListView,
-    RecipientUpdateView,
-)
+from newsletter.views import (HomeView, MailingAttemptListView,
+                              MailingCreateView, MailingDeleteView,
+                              MailingDetailView, MailingListView,
+                              MailingUpdateView, MessageCreateView,
+                              MessageDeleteView, MessageDetailView,
+                              MessageListView, MessageUpdateView,
+                              RecipientCreateView, RecipientDeleteView,
+                              RecipientDetailView, RecipientListView,
+                              RecipientUpdateView)
 
 app_name = NewsletterConfig.name
 

@@ -103,3 +103,35 @@ class CustomLoginForm(AuthenticationForm):
                 "class": "form-control",
             }
         )
+
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = (
+            "email",
+            "avatar",
+            "phone_number",
+            "country",
+        )
+
+    def __init__(self, *args, **kwargs):
+        super(UserProfileForm, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.help_text = ""
+
+        self.fields["email"].widget.attrs.update(
+            {"class": "form-control", "placeholder": "Почта"}
+        )
+
+        self.fields["avatar"].widget.attrs.update(
+            {"class": "form-control", "placeholder": "Аватар"}
+        )
+
+        self.fields["phone_number"].widget.attrs.update(
+            {"class": "form-control", "placeholder": "Номер телефона"}
+        )
+
+        self.fields["country"].widget.attrs.update(
+            {"class": "form-control", "placeholder": "Страна проживания"}
+        )

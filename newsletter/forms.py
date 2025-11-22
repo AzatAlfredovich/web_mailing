@@ -96,3 +96,9 @@ class MailingModeratorForm(ModelForm):
     class Meta:
         model = Mailing
         fields = ("is_active",)
+
+    def __init__(self, *args, **kwargs):
+        super(MailingModeratorForm, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.help_text = ""
+        self.fields["is_active"].widget.attrs.update({"class": "form-check-input"})

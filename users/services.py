@@ -18,4 +18,4 @@ def email_verification(request, token):
     user = get_object_or_404(CustomUser, token=token)
     user.is_active = True
     user.save()
-    return HttpResponseRedirect(reverse("newsletter:recipients"))
+    return HttpResponseRedirect(reverse("newsletter:home"))

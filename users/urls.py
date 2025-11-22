@@ -6,13 +6,10 @@ from django.views.decorators.cache import cache_page
 
 from users.apps import UsersConfig
 from users.services import block_user, email_verification
-from users.views import (
-    CustomLoginView,
-    EmailConfirmationView,
-    PasswordRecoveryView,
-    RegisterView,
-    UsersListView,
-)
+from users.views import (CustomLoginView, EmailConfirmationView,
+                         PasswordRecoveryView, RegisterView,
+                         UserProfileDetailView, UserProfileUpdateView,
+                         UsersListView)
 
 app_name = UsersConfig.name
 
@@ -37,6 +34,8 @@ urlpatterns = [
     path(
         "password_recovery/", PasswordRecoveryView.as_view(), name="password_recovery"
     ),
+    path("profile/detail/", UserProfileDetailView.as_view(), name="profile_detail"),
+    path("profile/update/", UserProfileUpdateView.as_view(), name="profile_update"),
 ]
 
 if settings.DEBUG:

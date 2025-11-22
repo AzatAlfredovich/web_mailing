@@ -14,11 +14,11 @@
                     <h4 class="my-0 font-weight-normal">{{ recipient.name }}</h4>
                 </div>
                 <div class="card-body">
-                    <h2 class="card-text fs-4">Почта: {{ object.email }}</h2>
-                    <h2 class="lead mb-3">Комментарий: {{ object.comment | truncatechars:100 }}</h2>
+                    <h2 class="card-text fs-4">Почта: {{ recipient.email }}</h2>
+                    <h2 class="lead mb-3">Комментарий: {{ recipient.comment | truncatechars:100 }}</h2>
                     <a class="btn btn-md btn-block btn-outline-primary mb-3" href="{% url 'newsletter:recipients' %}" role="button" >К получателям</a>
                 </div>
             </div>
         </div>
     </div>
-{% endblock%}
+{% endblock %}
