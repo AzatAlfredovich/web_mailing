@@ -29,7 +29,7 @@
 
 
                         <!-- Менеджер: только просмотр ВСЕХ рассылок -->
-                        {% elif view.is_manager %}
+                        {% elif user.is_manager %}
                             <a class="btn btn-md btn-outline-success full-width-btn mb-3"
                                href="{% url 'newsletter:mailing_detail' mailing.pk %}">Посмотреть</a>
                             <a class="btn btn-md btn-outline-primary full-width-btn mb-3"

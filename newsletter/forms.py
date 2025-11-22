@@ -35,18 +35,6 @@ class MailingForm(ModelForm):
         self.fields["recipients"].widget.attrs.update(
             {"class": "form-control", "placeholder": "Получатели"}
         )
-        self.fields["successful_attempts"].widget.attrs.update(
-            {"class": "form-control", "placeholder": "Успешные попытки"}
-        )
-
-        self.fields["unsuccessful_attempts"].widget.attrs.update(
-            {"class": "form-control", "placeholder": "Неуспешные попытки"}
-        )
-
-        self.fields["sent_messages"].widget.attrs.update(
-            {"class": "form-control", "placeholder": "Сообщений отправлено"}
-        )
-
         self.fields["is_active"].widget.attrs.update({"class": "form-check-input"})
 
 
@@ -76,7 +64,7 @@ class RecipientForm(ModelForm):
 class MessageForm(ModelForm):
     class Meta:
         model = Message
-        fields = "__all__"
+        exclude = ("owner",)
 
     def __init__(self, *args, **kwargs):
         super(MessageForm, self).__init__(*args, **kwargs)

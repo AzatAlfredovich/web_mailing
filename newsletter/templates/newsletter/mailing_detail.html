@@ -10,6 +10,18 @@
                 </div>
                 <div class="card-body">
                     <h2 class="card-text fs-4">Статус: {{object.get_status_display}}</h2>
+                    {% if user.is_superuser or mailing.owner == user %}
+                        {% if mailing.is_active %}
+                            <!-- Кнопка отправки рассылки доступна только владельцу
+                                 и только если рассылка активна -->
+                            <form method="post" action="{% url 'newsletter:mailing_send' mailing.id %}">
+                              {% csrf_token %}
+                              <button class="btn btn-primary mt-3 mb-3" type="submit">
+                                Отправить рассылку сейчас
+                              </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
                     <h2 class="lead mb-3 mt-3">Получатели: {% for recipient in object.recipients.all %}{{ recipient }}{% if not forloop.last %}, {% endif %}{% endfor %}</h2>
                     <h2 class="lead mb-3">Сообщение: {{object.message | truncatechars:100}}</h2>
                     <a class="btn btn-md btn-block btn-outline-primary mb-3" href="{% url 'newsletter:mailings' %}" role="button" >К рассылкам</a>

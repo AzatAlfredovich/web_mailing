@@ -10,6 +10,8 @@ class CustomUserAdmin(admin.ModelAdmin):
         "email",
         "phone_number",
         "country",
+        "is_active",
+        "is_manager",
     )
     list_filter = ("email",)
     search_fields = (

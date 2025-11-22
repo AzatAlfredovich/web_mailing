@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.conf.global_settings import EMAIL_HOST_USER
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
@@ -6,42 +8,54 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
 
+from config import settings
 from config.settings import CACHE_ENABLED
 from newsletter.models import Mailing, Mailing_Attempt
 
 
-def run_mailing(request, pk):
-    """Функция запуска рассылки по требованию"""
-    mailing = get_object_or_404(Mailing, id=pk)
-    for recipient in mailing.recipients.all():
+def run_mailing(mailing: Mailing) -> None:
+    """
+    Отправка писем по рассылке и создание записей Mailing_Attempt.
+    """
+
+    recipients = mailing.recipients.all()
+    if not recipients.exists():
+        return
+
+    subject = mailing.message.subject
+    body = mailing.message.body
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "no-reply@example.com")
+
+    # Если рассылка только создана, то помечаем как запущенную
+    if mailing.status == "created":
+        mailing.status = "launched"
+        mailing.save(update_fields=["status"])
+
+    for recipient in recipients:
         try:
-            mailing.status = "launched"
-            send_mail(
-                subject=mailing.message.subject,
-                message=mailing.message.body,
-                from_email=EMAIL_HOST_USER,
-                recipient_list=[recipient.email],
+            sent_count = send_mail(
+                subject,
+                body,
+                from_email,
+                [recipient.email],
                 fail_silently=False,
             )
-            Mailing_Attempt.objects.create(
-                attempt_date=timezone.now(),
-                status="successful",
-                server_response="Email отправлен",
-                mailing=mailing,
-            )
+            if sent_count:
+                Mailing_Attempt.objects.create(
+                    mailing=mailing,
+                    status="successful",
+                    server_response="Отправлено успешно",
+                )
+            else:
+                Mailing_Attempt.objects.create(
+                    mailing=mailing,
+                    status="unsuccessful",
+                    server_response="send_mail вернул 0 (письмо не отправлено)",
+                )
         except Exception as e:
-            print(f"Ошибка при отправке письма для {recipient.email}: {str(e)}")
             Mailing_Attempt.objects.create(
-                attempt_date=timezone.now(),
-                status="unsuccessful",
-                server_response=str(e),
-                mailing=mailing,
+                mailing=mailing, status="unsuccessful", server_response=str(e)
             )
-    if mailing.end_time and mailing.end_time <= timezone.now():
-        # Если время рассылки закончилось, обновляем статус на "завершено"
-        mailing.status = "completed"
-    mailing.save()
-    return redirect("newsletter:mailings")
 
 
 @login_required

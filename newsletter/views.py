@@ -1,14 +1,25 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import (CreateView, DeleteView, DetailView, ListView,
-                                  TemplateView, UpdateView)
+from django.views.generic import (
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    TemplateView,
+    UpdateView,
+)
 
-from newsletter.forms import (MailingForm, MailingModeratorForm, MessageForm,
-                              RecipientForm)
+from newsletter.forms import (
+    MailingForm,
+    MailingModeratorForm,
+    MessageForm,
+    RecipientForm,
+)
 from newsletter.models import Mailing, Mailing_Attempt, Message, Recipient
-from newsletter.services import get_mailing_from_cache
+from newsletter.services import get_mailing_from_cache, run_mailing
 
 
 class RoleBasedMixin:
@@ -102,7 +113,7 @@ class RecipientCreateView(RoleBasedMixin, LoginRequiredMixin, CreateView):
         if request.user.is_superuser:
             return super().dispatch(request, *args, **kwargs)
         if not request.user.has_perm("newsletter.add_recipient"):
-            raise PermissionDenied("У вас нет прав на создание получателя")
+            return redirect("users:login")
         return super().dispatch(request, *args, **kwargs)
 
 
@@ -152,29 +163,102 @@ class RecipientDeleteView(RoleBasedMixin, LoginRequiredMixin, DeleteView):
 
 
 # Дженерики класса Сообщение
-class MessageListView(LoginRequiredMixin, ListView):
+class MessageListView(RoleBasedMixin, LoginRequiredMixin, ListView):
     model = Message
 
+    def get_queryset(self):
+        return Message.objects.filter(**self.get_owner_filter())
 
-class MessageDetailView(LoginRequiredMixin, DetailView):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        if not request.user.has_perm("newsletter.view_message"):
+            return redirect("users:login")
+        return super().dispatch(request, *args, **kwargs)
+
+
+class MessageDetailView(RoleBasedMixin, LoginRequiredMixin, DetailView):
     model = Message
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if (
+            not self.is_manager
+            and obj.owner != self.request.user
+            and not self.is_superuser
+        ):
+            raise PermissionDenied("У вас нет доступа к этому сообщению")
+        return obj
 
-class MessageCreateView(LoginRequiredMixin, CreateView):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        if not request.user.has_perm("newsletter.view_message"):
+            raise PermissionDenied("У вас нет прав на просмотр сообщения")
+        return super().dispatch(request, *args, **kwargs)
+
+
+class MessageCreateView(RoleBasedMixin, LoginRequiredMixin, CreateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy("newsletter:messages")
 
+    def form_valid(self, form):
+        if not self.is_manager:
+            form.instance.owner = self.request.user
+        return super().form_valid(form)
 
-class MessageUpdateView(LoginRequiredMixin, UpdateView):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        if not request.user.has_perm("newsletter.add_message"):
+            return redirect("users:login")
+        return super().dispatch(request, *args, **kwargs)
+
+
+class MessageUpdateView(RoleBasedMixin, LoginRequiredMixin, UpdateView):
     model = Message
     form_class = MessageForm
     success_url = reverse_lazy("newsletter:messages")
 
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if (
+            not self.is_manager
+            and obj.owner != self.request.user
+            and not self.is_superuser
+        ):
+            raise PermissionDenied("Вы не можете редактировать это сообщение")
+        return obj
 
-class MessageDeleteView(LoginRequiredMixin, DeleteView):
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        if not request.user.has_perm("newsletter.change_message"):
+            raise PermissionDenied("У вас нет прав на редактирование сообщения")
+        return super().dispatch(request, *args, **kwargs)
+
+
+class MessageDeleteView(RoleBasedMixin, LoginRequiredMixin, DeleteView):
     model = Message
     success_url = reverse_lazy("newsletter:messages")
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if (
+            not self.is_manager
+            and obj.owner != self.request.user
+            and not self.is_superuser
+        ):
+            raise PermissionDenied("Вы не можете удалить это сообщение")
+        return obj
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        if not request.user.has_perm("newsletter.delete_message"):
+            raise PermissionDenied("У вас нет прав на удаление сообщения")
+        return super().dispatch(request, *args, **kwargs)
 
 
 # Дженерики класса Рассылка
@@ -319,23 +403,57 @@ class MailingAttemptListView(RoleBasedMixin, LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         for mailing in context["object_list"]:
-            # Получаем все попытки для рассылки
             attempts = mailing.mailing_attempt_set.all()
 
             # Считаем статусы
-            successful = sum(1 for a in attempts if a.status == "successful")
-            unsuccessful = sum(1 for a in attempts if a.status == "unsuccessful")
-            total = successful + unsuccessful
-
-            # Обновляем атрибуты объекта (для шаблона)
-            mailing.successful_attempts = successful
-            mailing.unsuccessful_attempts = unsuccessful
-            mailing.sent_messages = 0  # Не можем посчитать без sent_count
+            successful_attempts = sum(1 for a in attempts if a.status == "successful")
+            unsuccessful_attempts = sum(
+                1 for a in attempts if a.status == "unsuccessful"
+            )
+            total_attempts = successful_attempts + unsuccessful_attempts
 
             # Рассчитываем процент успешности
-            if total > 0:
-                mailing.success_rate = round((successful / total) * 100, 1)
+            if total_attempts > 0:
+                success_rate = round((successful_attempts / total_attempts) * 100, 1)
             else:
-                mailing.success_rate = 0.0
+                success_rate = 0.0
+
+            mailing.successful_attempts = successful_attempts
+            mailing.unsuccessful_attempts = unsuccessful_attempts
+            mailing.total_attempts = total_attempts
+            mailing.success_rate = success_rate
 
         return context
+
+
+# Отправка рассылку вручную
+def send_mailing_view(request, pk):
+    """
+    Запуск отправки рассылки по кнопке на странице.
+    """
+    mailing = get_object_or_404(Mailing, pk=pk)
+
+    # Проверка: владелец или менеджер/админ
+    user = request.user
+    if not (
+        user.is_authenticated
+        and (
+            mailing.owner == user
+            or user.is_superuser
+            or user.has_perm("newsletter.view_mailing")
+        )
+    ):
+        messages.error(request, "У вас нет прав для отправки этой рассылки!")
+        return redirect("newsletter:mailing_detail", pk=pk)
+
+    if request.method == "POST":
+        if not mailing.is_active:
+            messages.error(request, "Рассылка отключена. Сначала включите её!")
+        else:
+            run_mailing(mailing)
+            messages.success(request, "Рассылка отправлена, попытки зафиксированы!")
+
+        return redirect("newsletter:mailing_detail", pk=pk)
+
+    # Если вдруг зайдут GET-запросом просто вернёмся на детали
+    return redirect("newsletter:mailing_detail", pk=pk)

@@ -43,6 +43,9 @@ class Message(models.Model):  # Сообщение
         verbose_name="Тело письма",
         help_text="Введите текст письма",
     )
+    owner = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, blank=True, null=True
+    )
 
     class Meta:
         verbose_name = "Письмо"
@@ -80,13 +83,6 @@ class Mailing(models.Model):  # Рассылка
     recipients = models.ManyToManyField(
         Recipient, related_name="mailings", verbose_name="Получатели"
     )
-    successful_attempts = models.IntegerField(
-        default=0, verbose_name="Успешные попытки"
-    )
-    unsuccessful_attempts = models.IntegerField(
-        default=0, verbose_name="Неуспешные попытки"
-    )
-    sent_messages = models.IntegerField(default=0, verbose_name="Сообщений отправлено")
     is_active = models.BooleanField(default=True, verbose_name="Рассылка активна")
     owner = models.ForeignKey(
         CustomUser, on_delete=models.CASCADE, blank=True, null=True
@@ -116,7 +112,10 @@ class Mailing_Attempt(models.Model):  # Попытка рассылки
         null=True, blank=True, verbose_name="Ответ сервера"
     )
     mailing = models.ForeignKey(
-        Mailing, on_delete=models.CASCADE, verbose_name="Рассылка"
+        Mailing,
+        on_delete=models.CASCADE,
+        verbose_name="Рассылка",
+        related_name="mailing_attempt_set",
     )
 
     class Meta:

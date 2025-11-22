@@ -35,7 +35,7 @@
                                     </li>
                                     <li>
                                         <strong>Всего попыток:</strong>
-                                        {{ mailing.successful_attempts|add:mailing.unsuccessful_attempts }}
+                                        {{ mailing.total_attempts }}
                                     </li>
                                     {% if mailing.success_rate > 0 %}
                                         <li>

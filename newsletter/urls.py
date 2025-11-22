@@ -4,24 +4,36 @@ from django.urls import path
 from django.views.decorators.cache import cache_page
 
 from newsletter.apps import NewsletterConfig
-from newsletter.views import (HomeView, MailingAttemptListView,
-                              MailingCreateView, MailingDeleteView,
-                              MailingDetailView, MailingListView,
-                              MailingUpdateView, MessageCreateView,
-                              MessageDeleteView, MessageDetailView,
-                              MessageListView, MessageUpdateView,
-                              RecipientCreateView, RecipientDeleteView,
-                              RecipientDetailView, RecipientListView,
-                              RecipientUpdateView)
+from newsletter.views import (
+    HomeView,
+    MailingAttemptListView,
+    MailingCreateView,
+    MailingDeleteView,
+    MailingDetailView,
+    MailingListView,
+    MailingUpdateView,
+    MessageCreateView,
+    MessageDeleteView,
+    MessageDetailView,
+    MessageListView,
+    MessageUpdateView,
+    RecipientCreateView,
+    RecipientDeleteView,
+    RecipientDetailView,
+    RecipientListView,
+    RecipientUpdateView,
+    send_mailing_view,
+)
 
 app_name = NewsletterConfig.name
 
 urlpatterns = [
     path("", HomeView.as_view(), name="home"),
-    path("recipient/", cache_page(60)(RecipientListView.as_view()), name="recipients"),
+    # Получатели
+    path("recipient/", RecipientListView.as_view(), name="recipients"),
     path(
         "recipient/<int:pk>/",
-        cache_page(60)(RecipientDetailView.as_view()),
+        RecipientDetailView.as_view(),
         name="recipient_detail",
     ),
     path("recipient/create/", RecipientCreateView.as_view(), name="recipient_create"),
@@ -35,10 +47,11 @@ urlpatterns = [
         RecipientDeleteView.as_view(),
         name="recipient_delete",
     ),
-    path("message/", cache_page(60)(MessageListView.as_view()), name="messages"),
+    # Сообщения (письма)
+    path("message/", MessageListView.as_view(), name="messages"),
     path(
         "message/<int:pk>/",
-        cache_page(60)(MessageDetailView.as_view()),
+        MessageDetailView.as_view(),
         name="message_detail",
     ),
     path("message/create/", MessageCreateView.as_view(), name="message_create"),
@@ -48,10 +61,11 @@ urlpatterns = [
     path(
         "message/<int:pk>/delete/", MessageDeleteView.as_view(), name="message_delete"
     ),
-    path("mailing/", cache_page(60)(MailingListView.as_view()), name="mailings"),
+    # Рассылки
+    path("mailing/", MailingListView.as_view(), name="mailings"),
     path(
         "mailing/<int:pk>/",
-        cache_page(60)(MailingDetailView.as_view()),
+        MailingDetailView.as_view(),
         name="mailing_detail",
     ),
     path("mailing/create/", MailingCreateView.as_view(), name="mailing_create"),
@@ -61,8 +75,15 @@ urlpatterns = [
     path(
         "mailing/<int:pk>/delete/", MailingDeleteView.as_view(), name="mailing_delete"
     ),
+    # Статистика и попытки рассылок
     path(
         "stats/", cache_page(60)(MailingAttemptListView.as_view()), name="attempt_list"
+    ),
+    # Отправка рассылки вручную
+    path(
+        "mailing/<int:pk>/send/",
+        send_mailing_view,
+        name="mailing_send",
     ),
 ]
 

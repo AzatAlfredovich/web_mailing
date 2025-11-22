@@ -12,8 +12,12 @@ from django.views.generic import DetailView, ListView, TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 
 from newsletter.models import Mailing
-from users.forms import (CustomLoginForm, CustomUserCreationForm,
-                         PasswordRecoveryForm, UserProfileForm)
+from users.forms import (
+    CustomLoginForm,
+    CustomUserCreationForm,
+    PasswordRecoveryForm,
+    UserProfileForm,
+)
 from users.models import CustomUser
 
 
@@ -47,9 +51,14 @@ class CustomLoginView(LoginView):
 class UsersListView(LoginRequiredMixin, ListView):
     model = CustomUser
     template_name = "users/users_list.html"
+    context_object_name = "users"  # Явное имя для списка пользователей
+
+    def get_queryset(self):
+        """Возвращает всех пользователей без суперпользователей."""
+        return CustomUser.objects.filter(is_superuser=False)
 
     def dispatch(self, request, *args, **kwargs):
-        # Проверяем, имеет ли пользователь право на просмотр списка клиентов
+        """Проверяет права пользователя на просмотр списка."""
         if not request.user.has_perm("users.view_customuser"):
             return HttpResponseForbidden(
                 "У вас нет прав для просмотра списка пользователей!"
@@ -57,26 +66,9 @@ class UsersListView(LoginRequiredMixin, ListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
-        context_data = super().get_context_data(**kwargs)
-
-        user = self.request.user
-        user_mailings = Mailing.objects.filter(owner=user)
-        context_data["total_successful_attempts"] = (
-            user_mailings.aggregate(Sum("successful_attempts"))[
-                "successful_attempts__sum"
-            ]
-            or 0
-        )
-        context_data["total_unsuccessful_attempts"] = (
-            user_mailings.aggregate(Sum("unsuccessful_attempts"))[
-                "unsuccessful_attempts__sum"
-            ]
-            or 0
-        )
-        context_data["total_sent_messages"] = (
-            user_mailings.aggregate(Sum("sent_messages"))["sent_messages__sum"] or 0
-        )
-        return context_data
+        """Передаёт в шаблон только список пользователей."""
+        context = super().get_context_data(**kwargs)
+        return context
 
 
 class EmailConfirmationView(TemplateView):
