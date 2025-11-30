@@ -1,0 +1,43 @@
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
+    <nav class="ms-2 d-flex justify-content-between w-100">
+        <div class="d-flex gap-3 ms-lg-5 me-auto">
+            <a class="btn btn-outline-primary flex-fill text-truncate" href="{% url 'newsletter:home' %}" role="button">Главная</a>
+            <a class="btn btn-outline-primary flex-fill text-truncate" href="{% url 'newsletter:recipients' %}" role="button">Получатели</a>
+            <a class="btn btn-outline-primary flex-fill text-truncate" href="{% url 'newsletter:messages' %}" role="button">Сообщения</a>
+            <a class="btn btn-outline-primary flex-fill text-truncate" href="{% url 'newsletter:mailings' %}" role="button">Рассылки</a>
+        </div>
+
+        <div class="d-flex gap-3 ms-auto pe-lg-5 align-items-center">
+            <!-- Приветствие -->
+            <div class="me-3">
+                {% if user.is_authenticated %}
+                    <strong>Привет, {{ user.email }}!</strong>
+                {% else %}
+                    <strong>Добро пожаловать!</strong>
+                {% endif %}
+            </div>
+
+            <!-- Авторизация -->
+            {% if user.is_authenticated %}
+                {% if user.is_superuser or perms.users.can_block_user %}
+                <a class="btn btn-outline-success flex-fill" href="{% url 'users:users_list' %}" role="button">Пользователи</a>
+                {% endif %}
+
+                {% if user.is_superuser or not perms.users.can_manage_users %}
+                    <a class="btn btn-outline-primary flex-fill text-truncate" href="{% url 'newsletter:attempt_list' %}" role="button">Статистика</a>
+                {% endif %}
+
+                <a class="btn btn-primary flex-fill text-truncate" href="{% url 'users:profile_detail' %}" role="button">Личный кабинет
+                </a>
+
+                <form method="post" action="{% url 'users:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger flex-fill">Выйти</button>
+                </form>
+            {% else %}
+                <a class="btn btn-outline-success flex-fill" href="{% url 'users:login' %}" role="button">Войти</a>
+                <a class="btn btn-outline-primary flex-fill" href="{% url 'users:register' %}" role="button">Регистрация</a>
+            {% endif %}
+        </div>
+    </nav>
+</div>

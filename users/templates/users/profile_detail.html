@@ -1,0 +1,35 @@
+{% extends "newsletter/base.html" %}
+{% load my_tags %}
+
+{% block create_button %}
+<a class="btn btn-primary" href="{% url 'users:profile_update' %}" role="button">Редактировать профиль</a>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row text-center">
+        <div class="col-6 mx-auto">
+            <div class="card mb-4 box-shadow">
+                <div class="card-header">
+                    <h4 class="my-0 font-weight-normal">Пользователь: {{ user.email }}</h4>
+                </div>
+                <div class="card-body text-center">
+                    <!-- Блок с аватаром -->
+                    <div class="mb-3">
+                        <img
+                            src="{% if user.avatar %}{{ user.avatar.url }}{% else %}/static/img/default-avatar.png{% endif %}"
+                            alt="Аватар пользователя"
+                            class="rounded-circle"
+                            style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
+                        >
+                    </div>
+
+                    <!-- Данные пользователя -->
+                    <h2 class="card-text fs-4">Почта: {{ user.email }}</h2>
+                    <h2 class="lead mb-3 mt-3">Номер телефона: {{ user.phone_number }}</h2>
+                    <h2 class="lead mb-3">Страна проживания: {{ user.country }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

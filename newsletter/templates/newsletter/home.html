@@ -1,0 +1,16 @@
+{% extends "newsletter/base.html" %}
+{% load my_tags %}
+{% block content %}
+<div class="container">
+    <div class="row text-center">
+        <h4 class="display-4 mb-5">Добро пожаловать на сайт, где вы можете создать рассылку и отправить своему клиенту!</h4>
+        <p class="lead">Просто нажмите на кнопку выше, авторизуйтесь и приступайте к заполнению! Да-да, прямо над приветственной частью!</p>
+    </div>
+
+    <div class="row text-center">
+        <h4 class="display-6 mb-5 mt-5">На данный момент времени у нас:</h4>
+        <p class="lead">Создано рассылок: {{ count_mailing }}</p>
+        <p class="lead">Количество активных запущенных рассылок:  {{ active_mailing_count }}</p>
+        <p class="lead">Количество уникальных получателей:  {{ unique_clients_count }}</p>
+    </div>
+{% endblock %}

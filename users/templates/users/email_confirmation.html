@@ -1,0 +1,25 @@
+{% extends "newsletter/base.html" %}
+
+{% block create_button %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row text-center mx-auto">
+                <div class="alert" role="alert">
+                    <h4 class="row justify-content-center">Письмо подтверждения отправлено!</h4>
+                    <p class="row justify-content-center">
+                    На адрес электронной почты было отправлено письмо с подтверждением. Пожалуйста, проверьте свою
+                    электронную почту и нажмите на ссылку подтверждения, чтобы завершить регистрацию.
+                    Если письмо не пришло, проверьте папку спам.
+                    </p>
+
+                    <div class="row justify-content-center">
+                    <div class="col-3"></div>
+                            <div class="col-12">
+                                <a class="btn btn-primary mt-3" href="{% url 'users:login' %}" role="button">Авторизоваться</a>
+                            </div>
+                    </div>
+                </div>
+    </div>
+{% endblock%}

@@ -1,0 +1,23 @@
+{% extends "newsletter/base.html" %}
+{% load my_tags %}
+
+{% block create_button %}
+<a class="btn btn-primary" href="{% url 'newsletter:message_create' %}" role="button">Создать сообщение</a>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row text-center">
+        <div class="col-6 mx-auto">
+            <div class="card mb-4 box-shadow">
+                <div class="card-header mb-2">
+                    <h4 class="my-0 font-weight-normal">{{ message.subject }}</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-text fs-4">Сообщение: {{ object.body}}</h5>
+                    <a class="btn btn-md btn-block btn-outline-primary mb-3 mt-3" href="{% url 'newsletter:messages' %}" role="button" >К сообщениям</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock%}
